@@ -1,26 +1,35 @@
 ---
-layout: lesson
-root: .
-title: Databases using SQL
-minutes: 60
+title: "Databases using SQL"
+teaching: 60
+exercises: 5
+questions:
+- "What is a relational database and why should I use it?"
+- "What is SQL?"
+objectives:
+- "Understand the benefits of using a relational database"
+- "Set up a small database from csv files using SQLite"
+- "Understand SQLite data types"
+keypoints:
+- "SQL allows us to select and group subsets of data, do math and other calculations, and combine data."
+- "A relational database is made up of tables which are related to each other by shared keys."
+- "Different database management systems (DBMS) use slightly different vocabulary, but they are all based on the same ideas."
 ---
 
 ## Setup
 
 _Note: this should have been done by participants before the start of the workshop._
 
-1. Install Firefox
-2. Install the SQLite Manager add on: **Menu (the three horizontal lines near the
-top right corner of Firefox) -> Add-ons -> Search -> SQLite
-Manager -> Install -> Restart now**
-4. Add SQLite Manager to the menu: **Menu -> Customize, then drag the SQLite
-   Manager icon to one of the empty menu squares on the right, Exit Customize**
-5. Open SQLite Manager: **Menu -> SQLite Manager**
+We use [SQLite Manager](https://addons.mozilla.org/en-us/firefox/addon/sqlite-manager/)
+and the 
+[Portal Project dataset](https://figshare.com/articles/Portal_Project_Teaching_Database/1314459)
+throughout this lesson. See [Setup](/sql-ecology-lesson/setup/) for
+instructions on how to download the data, and also how to install and open
+SQLite Manager.
 
 # Motivation
 
 To start, let's orient ourselves in our project workflow.  Previously, 
-we used Excel and OpenRefine to go from from messy, human created data 
+we used Excel and OpenRefine to go from messy, human created data 
 to cleaned, computer-readable data.  Now we're going to move to the next piece 
 of the data workflow, using the computer to read in our data, and then 
 use it for analysis and visualization.  
@@ -49,16 +58,19 @@ We'll need the following three files:
 * `species.csv`
 * `plots.csv`
 
-> ### Challenge
+> ## Challenge
 >
+> Open each of these csv files and explore them. 
 > What information is contained in each file?  Specifically, if I had 
 > the following research questions: 
 > 
-> * What information can I learn about Dipodomys species in the 2000s, over time?  
+> * How has the hindfoot length and weight of *Dipodomys* species changed over time?
 > * What is the average weight of each species, per year?  
+> * What information can I learn about *Dipodomys* species in the 2000s, over time?
 > 
-> What would I need to answer these questions?  Which files have the data? What 
-> operations would I need to perform if I were doing this by hand?  
+> What would I need to answer these questions?  Which files have the data I need? What 
+> operations would I need to perform if I were doing these analyses by hand?  
+{: .challenge}
 
 ## Goals
 
@@ -75,49 +87,62 @@ for the right pieces of data ourselves, or clicking between spreadsheets,
 or manually sorting columns, we want to make the computer do the work.  
 
 In particular, we want to use a tool where it's easy to repeat our analysis 
-in case our data changes.  We also want to do all this searching without 
+in case our data changes. We also want to do all this searching without 
 actually modifying our source data.  
 
-Putting our data into a database and using SQL will help us achieve these goals.  
+Putting our data into a relational database and using SQL will help us achieve these goals.  
+
+> ## Definition: *Relational Database*
+>
+> A relational database stores data in *relations* made up of *records* with *fields*.
+> The relations are usually represented as *tables*;
+> each record is usually shown as a row, and the fields as columns.
+> In most cases, each record will have a unique identifier, called a *key*,
+> which is stored as one of its fields.
+> Records may also contain keys that refer to records in other tables,
+> which enables us to combine information from two or more sources.
+{: .callout}
 
 # Databases
 
 ## Why use relational databases
 
-* Data separate from analysis.
-    * No risk of accidentally changing data when analyzing it
-    * If we change the data we can just rerun the query
-* Fast for large amounts of data
-* Improve quality control of data entry (type constraints and use of forms in
-  Access, Filemaker, etc.)
+Using a relational database serves several purposes.
+
+* It keeps your data separate from your analysis.
+    * This means there's no risk of accidentally changing data when you analyze it.
+    * If we get new data we can just rerun the query.
+* It's fast, even for large amounts of data.
+* It improves quality control of data entry (type constraints and use of forms in MS Access, Filemaker, Oracle Application Express etc.)
 * The concepts of relational database querying are core to understanding how to do similar things using programming languages such as R or Python.
 
 ## Database Management Systems
 
 There are a number of different database management systems for working with
 relational data. We're going to use SQLite today, but basically everything we
-teach you will apply to the other database systems as well (e.g., MySQL,
-PostgreSQL, MS Access, Filemaker Pro). The only things that will differ are the
-details of exactly how to import and export data and the
-[details of data types](#datatypediffs).
+teach you will apply to the other database systems as well (e.g. MySQL,
+PostgreSQL, MS Access, MS SQL Server, Oracle Database and Filemaker Pro). The 
+only things that will differ are the details of exactly how to import and 
+export data and the [details of data types](#datatypediffs).
 
 ## Relational databases
 
-Let's download and look at a pre-existing database, the `portal_mammals.sqlite` 
-file.  Clicking on the "open file" icon and then that file will open the database.  
+Let's look at a pre-existing database, the `portal_mammals.sqlite`
+file from the Portal Project dataset that we downloaded during
+[Setup](/sql-ecology-lesson/setup/). Clicking on the "open file" icon, then
+find that file and clicking on it will open the database.
 
 You can see the tables in the database by looking at the left hand side of the
 screen under Tables, where each table corresponds to one of the `csv` files 
-we were exploring earlier.  To see the contents of any table, click on it, and 
-then go to the "Browse and Search" tab in the middle of the screen.  This will 
+we were exploring earlier.  To see the contents of any table, click on it, and
+then click the “Browse and Search” tab in the right panel.  This will 
 give us a view that we're used to - just a copy of the table.  Hopefully this 
-helps to show that a 
-database is, in some sense, just a collection of tables, where there's some value 
-in the tables that allows them to be connected to each other (the "related" part 
-of "relational database").  
+helps to show that a database is, in some sense, just a collection of tables, 
+where there's some value in the tables that allows them to be connected to each 
+other (the "related" part of "relational database").  
 
 The leftmost tab, "Structure", provides some metadata about each table.  It 
-describes the columns, often called *fields*.  (The rows of a database table 
+describes the columns, often called *fields*. (The rows of a database table 
 are called *records*.)  If you scroll down in the Structure view, you'll 
 see a list of fields, their labels, and their data *type*.  Each field contains 
 one variety or type of data, often numbers or text.  You can see in the 
@@ -143,7 +168,7 @@ To summarize:
 * No redundant information
     * Split into separate tables with one table per class of information
     * Needs an identifier in common between tables – shared column - to
-       reconnect (foreign key).
+       reconnect (known as a *foreign key*).
 
 ## Import
 
@@ -152,27 +177,48 @@ database.  We'll be creating this database from the three `csv` files
 we downloaded earlier.  Close the currently open database and then 
 follow these instructions: 
 
-1. Start a New Database **Database -> New Database**
+1. Start a New Database 
+    - **Database -> New Database**
+    - Give a name **Ok -> Open**. Creates the database in the opened folder
 2. Start the import **Database -> Import**
-3. Select the file to import
-4. Give the table a name that matches the file name (surveys, species, plots), or use the default
+3. Select the `surveys.csv` file to import
+4. Give the table a name that matches the file name (`surveys`), or use the default
 5. If the first row has column headings, check the appropriate box
 6. Make sure the delimiter and quotation options are appropriate for the CSV files.  Ensure 'Ignore trailing Separator/Delimiter' is left *unchecked*.
 7. Press **OK**
 8. When asked if you want to modify the table, click **OK**
-9. Set the data types for each field: choose TEXT for fields with text
-   (`species_id`, `genus`, `sex`, etc.) and INT for fields with numbers (`day`,
-   `month`, `year`, `weight`, etc.)
+9. Set the data types for each field using the suggestions in the table below (this includes fields from `plots` and `species` tables also):
 
-> ### Challenge
+| Field             | Data Type      | Motivation                                                                       | Table(s)          |
+|-------------------|:---------------|----------------------------------------------------------------------------------|-------------------|
+| day               | INTEGER        | Having data as numeric allows for meaningful arithmetic and comparisons          | surveys           |
+| genus             | TEXT           | Field contains text data                                                 	| species           |
+| hindfoot_length   | REAL           | Field contains measured numeric data                                             | surveys           |
+| month             | INTEGER        | Having data as numeric allows for meaningful arithmetic and comparisons          | surveys           |
+| plot_id           | INTEGER        | Field contains numeric data	    						| plots, surveys    |
+| plot_type         | TEXT           | Field contains text data                                                 	| plots             |
+| record_id         | INTEGER        | Field contains numeric data 							| surveys           |
+| sex               | TEXT           | Field contains text data                                                 	| surveys           |
+| species_id        | TEXT           | Field contains text data								| species, surveys  |
+| species           | TEXT           | Field contains text data                                                 	| species           |
+| taxa              | TEXT           | Field contains text data                                                 	| species           |
+| weight            | REAL           | Field contains measured numerical data                                           | surveys           |
+| year              | INTEGER        | Allows for meaningful arithmetic and comparisons                                 | surveys           |
+
+
+Finally, click **OK** one more time to confirm the operation.
+
+
+> ## Challenge
 >
-> Import the plots and species tables
+> - Import the `plots` and `species` tables
+{: .challenge}
 
 You can also use this same approach to append new data to an existing table.
 
 ## Adding data to existing tables
 
-1. Browse & Search -> Add
+1. "Browse and Search" tab -> Add
 1. Enter data into a csv file and append
 
 
@@ -217,7 +263,5 @@ The following table shows some of the common names of data types between the var
 | float                                                   | Number (single)           | Float / Real         | Number             | Float          | Numeric       |
 | currency                                                | Currency                  | Money                | N/A                | N/A            | Money         |
 | string (fixed)                                          | N/A                       | Char                 | Char               | Char           | Char          |
-| string (variable)                                       | Text (<256) / Memo (65k+) | Varchar              | Varchar / Varchar2 | Varchar        | Varchar       |
+| string (variable)                                       | Text (<256) / Memo (65k+) | Varchar              | Varchar2 | Varchar        | Varchar       |
 | binary object	OLE Object Memo	Binary (fixed up to 8K)   | Varbinary (<8K)           | Image (<2GB)	Long | Raw	Blob          | Text	Binary | Varbinary     |
-
-Previous: [Index](index.html) Next: [Basic queries.](01-sql-basic-queries.html)
