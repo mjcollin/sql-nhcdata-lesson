@@ -21,21 +21,21 @@ keypoints:
 Aggregation allows us to combine results by grouping records based on value and
 calculating combined values in groups.
 
-Let’s go to the surveys table and find out how many individuals there are.
+Let’s go to the specimens table and find out how many individuals there are.
 Using the wildcard simply counts the number of records (rows):
 
     SELECT COUNT(*)
-    FROM surveys;
+    FROM specimens;
 
 We can also find out how much all of those individuals weigh:
 
     SELECT COUNT(*), SUM(weight)
-    FROM surveys;
+    FROM specimens;
 
 We can output this value in kilograms, rounded to 3 decimal places:
 
     SELECT ROUND(SUM(weight)/1000, 3)
-    FROM surveys;
+    FROM specimens;
 
 There are many other aggregate functions included in SQL including
 `MAX`, `MIN`, and `AVG`.
@@ -51,7 +51,7 @@ Now, let's see how many individuals were counted in each species. We do this
 using a `GROUP BY` clause
 
     SELECT species_id, COUNT(*)
-    FROM surveys
+    FROM specimens
     GROUP BY species_id;
 
 `GROUP BY` tells SQL what field or fields we want to use to aggregate the data.
@@ -79,7 +79,7 @@ For example, we can adapt the last request we wrote to only return information
 about species with a count higher than 10:
 
     SELECT species_id, COUNT(species_id)
-    FROM surveys
+    FROM specimens
     GROUP BY species_id
     HAVING COUNT(species_id) > 10;
 
@@ -92,7 +92,7 @@ query, we can call the `COUNT(species_id)` by another name, like
 `occurrences`. This can be written this way:
 
     SELECT species_id, COUNT(species_id) AS occurrences
-    FROM surveys
+    FROM specimens
     GROUP BY species_id
     HAVING occurrences > 10;
 
@@ -114,7 +114,7 @@ the aggregated column.  Let’s count the number of individuals of each
 species captured, ordered by the count:
 
     SELECT species_id, COUNT(*)
-    FROM surveys
+    FROM specimens
     GROUP BY species_id
     ORDER BY COUNT(species_id);
 
@@ -133,7 +133,7 @@ the data gathered during the summer (May - September) of 2000.  That
 query would look like:
 
     SELECT *
-    FROM surveys
+    FROM specimens
     WHERE year = 2000 AND (month > 4 AND month < 10);
 
 But we don't want to have to type that every time we want to ask a
@@ -141,7 +141,7 @@ question about that particular subset of data.  Let's create a view:
 
     CREATE VIEW summer_2000 AS
     SELECT *
-    FROM surveys
+    FROM specimens
     WHERE year = 2000 AND (month > 4 AND month < 10);
 
 You can also add a view using *Create View* in the *View* menu and see the

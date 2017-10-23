@@ -32,9 +32,9 @@ tables using the word `ON`.  What we want is to join the data with the same
 species codes.
 
     SELECT *
-    FROM surveys
+    FROM specimens
     JOIN species
-    ON surveys.species_id = species.species_id;
+    ON specimens.species_id = species.species_id;
 
 `ON` is like `WHERE`, it filters things out according to a test condition.  We use
 the `table.colname` format to tell the manager what column in which table we are
@@ -51,11 +51,11 @@ that has the following column names:
 | ... |||||||||||||| 
 
 Alternatively, we can use the word `USING`, as a short-hand.  In this case we are
-telling the manager that we want to combine `surveys` with `species` and that
+telling the manager that we want to combine `specimens` with `species` and that
 the common column is `species_id`.
 
     SELECT *
-    FROM surveys
+    FROM specimens
     JOIN species
     USING (species_id);
 
@@ -74,10 +74,10 @@ For example, what if we wanted information on when individuals of each
 species were captured, but instead of their species ID we wanted their
 actual species names.
 
-    SELECT surveys.year, surveys.month, surveys.day, species.genus, species.species
-    FROM surveys
+    SELECT specimens.year, surveys.month, surveys.day, species.genus, species.species
+    FROM specimens
     JOIN species
-    ON surveys.species_id = species.species_id;
+    ON specimens.species_id = species.species_id;
 
 | year | month | day | genus | species |
 |---|---|---|---|---|
@@ -89,9 +89,9 @@ actual species names.
 Many databases, including SQLite, also support a join through the WHERE clause of a query.  
 For example, you may see the query above written without an explicit JOIN.
 
-	SELECT surveys.year, surveys.month, surveys.day, species.genus, species.species
-	FROM surveys, species
-	WHERE surveys.species_id = species.species_id;
+	SELECT specimens.year, surveys.month, surveys.day, species.genus, species.species
+	FROM specimens, species
+	WHERE specimens.species_id = species.species_id;
 
 For the remainder of this lesson, we'll stick with the explicit use of the JOIN keyword for 
 joining tables in SQL.  
@@ -107,14 +107,14 @@ joining tables in SQL.
 We can count the number of records returned by our original join query.
 
     SELECT COUNT(*)
-    FROM surveys
+    FROM specimens
     JOIN species
     USING (species_id);
 
 Notice that this number is smaller than the number of records present in the
 survey data.
 
-    SELECT COUNT(*) FROM surveys;
+    SELECT COUNT(*) FROM specimens;
 
 This is because, by default, SQL only returns records where the joining value
 is present in the join columns of both tables (i.e. it takes the _intersection_
@@ -127,12 +127,12 @@ table by using the command `LEFT OUTER JOIN`, or `LEFT JOIN` for short.
 
 > ## Challenge:
 >
-> - Re-write the original query to keep all the entries present in the `surveys`
+> - Re-write the original query to keep all the entries present in the `specimens`
 > table. How many records are returned by this query?
 {: .challenge}
 
 > ## Challenge:
-> - Count the number of records in the `surveys` table that have a `NULL` value
+> - Count the number of records in the `specimens` table that have a `NULL` value
 > in the `species_id` column.
 {: .challenge}
 
@@ -145,11 +145,11 @@ Joins can be combined with sorting, filtering, and aggregation.  So, if we
 wanted average mass of the individuals on each different type of treatment, we
 could do something like
 
-    SELECT plots.plot_type, AVG(surveys.weight)
-    FROM surveys
-    JOIN plots
-    ON surveys.plot_id = plots.plot_id
-    GROUP BY plots.plot_type;
+    SELECT localities.plot_type, AVG(specimens.weight)
+    FROM specimens
+    JOIN localities
+    ON specimens.plot_id = localities.plot_id
+    GROUP BY localities.plot_type;
 
 > ## Challenge:
 >
@@ -172,7 +172,7 @@ place of `NULL`.
 We can represent unknown sexes with "U" instead of `NULL`:
 
     SELECT species_id, sex, IFNULL(sex, 'U')
-    FROM surveys;
+    FROM specimens;
 
 The lone "sex" column is only included in the query above to illustrate where
 `IFNULL` has changed values; this isn't a usage requirement.
@@ -190,14 +190,14 @@ The lone "sex" column is only included in the query above to illustrate where
 {: .challenge}
 
 `IFNULL` can be particularly useful in `JOIN`. When joining the `species` and
-`surveys` tables earlier, some results were excluded because the `species_id`
+`specimens` tables earlier, some results were excluded because the `species_id`
 was `NULL`. We can use `IFNULL` to include them again, re-writing the `NULL` to
 a valid joining value:
 
-    SELECT surveys.year, surveys.month, surveys.day, species.genus, species.species
-    FROM surveys
+    SELECT specimens.year, surveys.month, surveys.day, species.genus, species.species
+    FROM specimens
     JOIN species
-    ON surveys.species_id = IFNULL(species.species_id, 'AB');
+    ON specimens.species_id = IFNULL(species.species_id, 'AB');
 
 > ## Challenge:
 >
@@ -213,7 +213,7 @@ is returned. This is useful for "nulling out" specific values.
 We can "null out" plot 7:
 
     SELECT species_id, plot_id, NULLIF(plot_id, 7)
-    FROM surveys;
+    FROM specimens;
 
 Some more functions which are common to SQL databases are listed in the table
 below:
@@ -252,21 +252,21 @@ clearer we can use aliases to assign new names to things in the query.
 We can alias both table names:
 
     SELECT surv.year, surv.month, surv.day, sp.genus, sp.species
-    FROM surveys AS surv
+    FROM specimens AS surv
     JOIN species AS sp
     ON surv.species_id = sp.species_id;
 
 And column names:
 
     SELECT surv.year AS yr, surv.month AS mo, surv.day AS day, sp.genus AS gen, sp.species AS sp
-    FROM surveys AS surv
+    FROM specimens AS surv
     JOIN species AS sp
     ON surv.species_id = sp.species_id;
 
 The `AS` isn't technically required, so you could do
 
     SELECT surv.year yr
-    FROM surveys surv;
+    FROM specimens surv;
 
 but using `AS` is much clearer so it is good style to include it.
 
@@ -276,7 +276,7 @@ but using `AS` is much clearer so it is good style to include it.
 >
 > Have a look at the following questions; these questions are written in plain English. Can you translate them to *SQL queries* and give a suitable answer?  
 > 
-> 1. How many plots from each type are there?  
+> 1. How many localities from each type are there?  
 > 
 > 2. How many specimens are of each sex are there for each year?  
 > 
@@ -294,20 +294,20 @@ but using `AS` is much clearer so it is good style to include it.
 >
 > > ## Proposed solutions:
 > >
-> > 1. Solution: `SELECT plot_type, count(*) AS num_plots  FROM plots  GROUP BY plot_type  ORDER BY num_plots DESC`
+> > 1. Solution: `SELECT plot_type, count(*) AS num_localities  FROM plots  GROUP BY plot_type  ORDER BY num_plots DESC`
 > >
-> > 2. Solution: `SELECT year, sex, count(*) AS num_animal  FROM surveys  WHERE sex IS NOT null  GROUP BY sex, year`
+> > 2. Solution: `SELECT year, sex, count(*) AS num_animal  FROM specimens  WHERE sex IS NOT null  GROUP BY sex, year`
 > >
-> > 3. Solution: `SELECT species_id, plot_type, count(*) FROM surveys JOIN plots ON surveys.plot_id=plots.plot_id WHERE species_id IS NOT null GROUP BY species_id, plot_type`
+> > 3. Solution: `SELECT species_id, plot_type, count(*) FROM specimens JOIN localities ON surveys.plot_id=plots.plot_id WHERE species_id IS NOT null GROUP BY species_id, plot_type`
 > >
-> > 4. Solution: `SELECT taxa, AVG(weight) FROM surveys JOIN species ON species.species_id=surveys.species_id GROUP BY taxa`
+> > 4. Solution: `SELECT taxa, AVG(weight) FROM specimens JOIN species ON species.species_id=surveys.species_id GROUP BY taxa`
 > >
-> > 5. Solution: `SELECT taxa, 100.0*count(*)/(SELECT count(*) FROM surveys) FROM surveys JOIN species ON surveys.species_id=species.species_id GROUP BY taxa`
+> > 5. Solution: `SELECT taxa, 100.0*count(*)/(SELECT count(*) FROM specimens) FROM surveys JOIN species ON surveys.species_id=species.species_id GROUP BY taxa`
 > >
-> > 6. Solution: `SELECT surveys.species_id, MIN(weight) as min_weight, MAX(weight) as max_weight, AVG(weight) as mean_weight FROM surveys JOIN species ON surveys.species_id=species.species_id WHERE taxa = 'Rodent' GROUP BY surveys.species_id`
+> > 6. Solution: `SELECT specimens.species_id, MIN(weight) as min_weight, MAX(weight) as max_weight, AVG(weight) as mean_weight FROM surveys JOIN species ON surveys.species_id=species.species_id WHERE taxa = 'Rodent' GROUP BY surveys.species_id`
 > >
-> > 7. Solution: `SELECT surveys.species_id, sex, AVG(hindfoot_length) as mean_foot_length  FROM surveys JOIN species ON surveys.species_id=species.species_id WHERE taxa = 'Rodent' AND sex IS NOT NULL GROUP BY surveys.species_id, sex`
+> > 7. Solution: `SELECT specimens.species_id, sex, AVG(hindfoot_length) as mean_foot_length  FROM surveys JOIN species ON surveys.species_id=species.species_id WHERE taxa = 'Rodent' AND sex IS NOT NULL GROUP BY surveys.species_id, sex`
 > >
-> > 8. Solution: `SELECT surveys.species_id, year, AVG(weight) as mean_weight FROM surveys JOIN species ON surveys.species_id=species.species_id WHERE taxa = 'Rodent' GROUP BY surveys.species_id, year`
+> > 8. Solution: `SELECT specimens.species_id, year, AVG(weight) as mean_weight FROM surveys JOIN species ON surveys.species_id=species.species_id WHERE taxa = 'Rodent' GROUP BY surveys.species_id, year`
 > {: .solution}
 {: .challenge}

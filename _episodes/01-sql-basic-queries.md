@@ -17,16 +17,16 @@ keypoints:
 
 ## Writing my first query
 
-Let's start by using the **surveys** table. Here we have data on every
+Let's start by using the **specimens** table. Here we have data on every
 individual that was captured at the site, including when they were captured,
 what plot they were captured on, their species ID, sex and weight in grams.
 
 Let’s write an SQL query that selects only the year column from the
-surveys table. SQL queries can be written in the box located under 
+specimens table. SQL queries can be written in the box located under 
 the "Execute SQL" tab. Click 'Run SQL' to execute the query in the box.
 
     SELECT year
-    FROM surveys;
+    FROM specimens;
 
 We have capitalized the words SELECT and FROM because they are SQL keywords.
 SQL is case insensitive, but it helps for readability, and is good style.
@@ -35,12 +35,12 @@ If we want more information, we can just add a new column to the list of fields,
 right after SELECT:
 
     SELECT year, month, day
-    FROM surveys;
+    FROM specimens;
 
 Or we can select all of the columns in a table using the wildcard *
 
     SELECT *
-    FROM surveys;
+    FROM specimens;
 
 ### Limiting results
 
@@ -49,7 +49,7 @@ of what's being returned. In that case you can use the LIMIT command. In particu
 you would want to do this if you were working with large databases.
 
     SELECT *
-    FROM surveys
+    FROM specimens
     LIMIT 10; 
 
 ### Unique values
@@ -58,13 +58,13 @@ If we want only the unique values so that we can quickly see what species have
 been sampled we use `DISTINCT` 
 
     SELECT DISTINCT species_id
-    FROM surveys;
+    FROM specimens;
 
 If we select more than one column, then the distinct pairs of values are
 returned
 
     SELECT DISTINCT year, species_id
-    FROM surveys;
+    FROM specimens;
 
 ### Calculated values
 
@@ -73,7 +73,7 @@ For example, if we wanted to look at the mass of each individual
 on different dates, but we needed it in kg instead of g we would use
 
     SELECT year, month, day, weight/1000
-    FROM surveys;
+    FROM specimens;
 
 When we run the query, the expression `weight / 1000` is evaluated for each
 row and appended to that row, in a new column. If we used the `INTEGER` data type
@@ -83,7 +83,7 @@ any arithmetic operators (`+`, `-`, `*`, and `/`) and a variety of built-in
 functions. For example, we could round the values to make them easier to read.
 
     SELECT plot_id, species_id, sex, weight, ROUND(weight / 1000, 2)
-    FROM surveys;
+    FROM specimens;
 
 > ## Challenge
 >
@@ -98,13 +98,13 @@ _Dipodomys merriami_, which has a species code of DM.  We need to add a
 `WHERE` clause to our query:
 
     SELECT *
-    FROM surveys
+    FROM specimens
     WHERE species_id='DM';
 
 We can do the same thing with numbers.
 Here, we only want the data since 2000:
 
-    SELECT * FROM surveys
+    SELECT * FROM specimens
     WHERE year >= 2000;
 
 If we used the `TEXT` data type for the year the `WHERE` clause should
@@ -113,7 +113,7 @@ with `AND` and `OR`.  For example, suppose we want the data on *Dipodomys merria
 starting in the year 2000:
 
     SELECT *
-    FROM surveys
+    FROM specimens
     WHERE (year >= 2000) AND (species_id = 'DM');
 
 Note that the parentheses are not needed, but again, they help with
@@ -124,7 +124,7 @@ If we wanted to get data for any of the *Dipodomys* species, which have
 species codes `DM`, `DO`, and `DS`, we could combine the tests using OR:
 
     SELECT *
-    FROM surveys
+    FROM specimens
     WHERE (species_id = 'DM') OR (species_id = 'DO') OR (species_id = 'DS');
 
 > ## Challenge
@@ -142,7 +142,7 @@ to understand.  It is equivalent to saying `WHERE (species_id = 'DM') OR (specie
 = 'DO') OR (species_id = 'DS')`, but reads more neatly:
 
     SELECT *
-    FROM surveys
+    FROM specimens
     WHERE (year >= 2000) AND (species_id IN ('DM', 'DO', 'DS'));
 
 We started with something simple, then added more clauses one by one, testing
@@ -156,8 +156,8 @@ comments are started by `--`, and end at the end of the line. For example, a
 commented version of the above query can be written as:
 
     -- Get post 2000 data on Dipodomys' species
-    -- These are in the surveys table, and we are interested in all columns
-    SELECT * FROM surveys
+    -- These are in the specimens table, and we are interested in all columns
+    SELECT * FROM specimens
     -- Sampling year is in the column `year`, and we want to include 2000
     WHERE (year >= 2000)
     -- Dipodomys' species have the `species_id` DM, DO, and DS
@@ -172,7 +172,7 @@ We can also sort the results of our queries by using `ORDER BY`.
 For simplicity, let’s go back to the **species** table and alphabetize it by taxa.
 
 First, let's look at what's in the **species** table. It's a table of the species_id and the full genus, species and taxa information for each species_id. Having this in a separate table is nice, because we didn't need to include all
-this information in our main **surveys** table.
+this information in our main **specimens** table.
 
     SELECT *
     FROM species;
@@ -202,7 +202,7 @@ To truly be alphabetical, we might want to order by genus then species.
 > ## Challenge
 >
 > - Write a query that returns year, species_id, and weight in kg from
-> the surveys table, sorted with the largest weights at the top.
+> the specimens table, sorted with the largest weights at the top.
 {: .challenge}
 
 ## Order of execution
@@ -232,7 +232,7 @@ we recommend to put each clause on its own line.
 > ## Challenge
 >
 > - Let's try to combine what we've learned so far in a single
-> query.  Using the surveys table write a query to display the three date fields,
+> query.  Using the specimens table write a query to display the three date fields,
 > `species_id`, and weight in kilograms (rounded to two decimal places), for
 > individuals captured in 1999, ordered alphabetically by the `species_id`.
 > - Write the query as a single line, then put each clause on its own line, and
